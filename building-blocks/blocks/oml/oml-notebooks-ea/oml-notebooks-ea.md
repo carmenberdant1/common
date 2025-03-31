@@ -1,4 +1,4 @@
-# Introduction to Oracle Machine Learning Notebooks 
+# Create and Run Notebooks in Oracle Machine Learning User Interface
 
 ## Introduction
 
@@ -26,10 +26,8 @@ The Oracle Machine Learning Notebooks provides:
 In this lab, you will learn how to:
 * Access the notebook environment
 * Create and run a Notebook
-* Edit notebooks
-* Create notebook versions
-* View version history and compare notebook versions
-* Create paragraph dependencies, and run the paragraphs based on paragraph dependency order
+* Explore the basic features of Oracle Machine Learning Notebooks
+* Visualize data in Oracle Machine Learning Notebooks
 
 ### Prerequisites
 
@@ -89,9 +87,9 @@ A notebook is a web-based interface for data analysis, data discovery, data visu
 	![Oracle Machine Learning UI Sign in page](images/oml-signin-page.png)
 
 </if>
-This completes the task of accessing Oracle Machine Learning user interface.
+This completes the task of signing into Oracle Machine Learning user interface.
 
-## Task 2: Access Oracle Machine Learning Notebook 
+## Task 2: Access Oracle Machine Learning Notebooks 
 
 You can access the Notebooks page from the left navigation pane of Oracle Machine Learning Notebook UI, or from the Notebooks listing page.
 To access the Notebooks page:
@@ -115,11 +113,13 @@ Here, you have the option to:
 * **Export:** To export a notebook, click **Export.** You can export Noteboooks in the `.dsnb` format, Zeppelin format (`.json` ) file and in Jupyter format (`.ipynb`), and later import them in to the same or a different environment. You can also export the notebook in HTML format, and optionally exclude paragraph code, results, and timestamps.
 * **Version:** To create versions of a notebook, select it and click **Version.** The Versions page for that particular notebook opens. Here, you can create a new version of the notebook by clicking **+Version.** The Create Version dialog opens. Enter a name of the notebook version, a description, and click **OK.** The new version of the notebook gets created by the same name with a suffix `_2` for the second version. For subsequent versions, suffix (number) increments by one. To revert to an older version by clicking Revert Version. You also have the option to delete any version of the notebook. Click **Back to Notebooks** to go to the OML Notebooks page.
 
-## Task 3: Create a notebook and define paragraphs using the md, SQL, PL/SQL, Python, and R Interpreters
+This completes the task of accessing Oracle Machine Learning Notebooks.
+
+## Task 3: Create a Notebook and Define Paragraphs using the md, SQL, PL/SQL, Python, and R Interpreters
 
 In this task, you will create a new notebook, and add paragraphs to connect to the Markdown, SQL, Script, Python, and R interpreters. Interpreters are independent backend engines. R and Python engines are stateful while the notebook is open, and database objects are valid for the duration the database connection is active. You can change the interpreter by explicitly specifying one of `%script`, `%python`, `%sql` , `%r` , `%md`, or `%conda` to connect to the respective interpreter.
 
-To learn about Conda, refer to [Use the Conda Interpreter in a Notebook Paragraph](https://docs.oracle.com/en/database/oracle/machine-learning/oml-notebooks/omlug/notebooks.html#GUID-0AAB3590-4422-450D-BE91-4EC435FD4254)
+To learn about Conda, refer to [Use the Conda Interpreter in a Notebook Paragraph](https://docs.oracle.com/en/database/oracle/machine-learning/oml-notebooks/omlug/run-notebook-conda-interpreter.html).
 
 1. On the Notebooks page, click **Create.**
 		![Create OML Notebooks](images/notebooks-ea-create.png)
@@ -193,7 +193,7 @@ Let’s create another paragraph to use the SQL interpreter and run SQL statemen
 
 	![Add SQL paragraph icon](images/add-sql-toolbar.png)
 
-	You may also choose to click on the Add Paragraph icon ![Add](images/add.png) to manually create a new paragraph. Then type  ``%sql``  and press Enter to call the SQL interpreter.
+	You may also choose to click on the Add Paragraph icon ![Add](images/add.png) to manually create a new paragraph. Then type ``%sql`` and press Enter to call the SQL interpreter.
 
 2. Type the following command and click the run icon .
 
@@ -302,45 +302,36 @@ In this task, you will use the R interpreter and run R statements:
 	```
 	![Load R libraries](images/load-ore-lattice.png)
 
-3. In this step, we load the IRIS data from a R data.frame into the database by using the `ore.push` function. This function creates the temporary table `IRIS_TMP` and returns a proxy object to which the variable IRIS_TMP is assigned. Run the following command:
+3. In this step, run the following script in an R paragraph to create the Iris dataset:
 
 	```
 	<copy>
 	%r
-	IRIS_TMP <- ore.push(iris)
-	dim(IRIS_TMP)
-	colnames(IRIS_TMP)
-	z.show(head(IRIS_TMP,10))
+	library(ORE)
+
+	if (ore.exists("IRIS_R")) ore.drop(table="IRIS_R")
+
+	ore.create(iris, table = "IRIS_R", overwrite=TRUE)
+
+	ore.exec("ANALYZE TABLE IRIS_R COMPUTE STATISTICS")
+
+	z.show(cat("Shape:", dim(IRIS_R)))
 	</copy>
 	```
 	![Create IRIS table](images/create-iris-temp.png)
 
-	Scroll down to view the table:
-	![View IRIS table](images/iris-temp-table.png)
-
-4. Run the following command to visualize the data in a histogram. In the histogram, the sepal length of the flower is plotted along the X-axis, and the frequency or count of the iris flower is plotted along the y-axis.   	
+	
+4. 	Run the following SQL command to view the dataset:
 
 	```
 	<copy>
-	%r
-
-	hist(IRIS_TMP$Sepal.Length, col="darkred")
+	%sql
+	select * from OMLUSER.IRIS_R
 	</copy>
 	```
+	![View IRIS table](images/iris-temp-table.png)
 
-	![Explore data in histogram](images/iris-temp-histogram.png)
-5. Run the following command to visualize the attribute distribution of the sepal length of the iris flower in a boxplot. The boxplot shows the distribution in quartiles.
 
-	```
-	<copy>
-	%r
-
-	boxplot(IRIS_TMP$Sepal.Length, horizontal=TRUE, notch=TRUE, col="darkgreen",
-		        showmeans=TRUE, xlab="cm", main="Distribution of IRIS Attributes")
-	</copy>					
-	```
-
-	![Attribute distribution in boxplot](images/boxplot-iris-attribute-dist.png)
 
 This completes the task of connecting to the R interpreter and running R commands in your notebook.
 
@@ -396,11 +387,11 @@ To edit an existing notebook:
 
 ### Paragraph level features:
 * Click ![Run](images/run-para.png) to run the selected paragraph.
-* Click ![Enter Dependency Mode](images/enter-dep-mode.png) to enter into Dependency Mode. In Dependency Mode, you select and deselect paragraphs to add or remove them as dependents.
+* Click ![Enter Dependency Mode](images/enter-dep-mode-icon.png) to enter into Dependency Mode. In Dependency Mode, you select and deselect paragraphs to add or remove them as dependents.
 
 	>**Note:** The Paragraph Dependencies feature allows you to add dependencies between paragraphs. The dependents of a paragraph automatically run after the original paragraph is run.
 
-* Click ![Comments](images/add-comments-icon.png)  to open the Comments dialog. Type in your comments here, and press Enter to add the comment. You can also delete any comments by clicking the corresponding **Delete** icon. Click the comments icon to close the dialog. You can provide comments for each paragraph in a notebook. Paragraphs with comments are indicated by a green dot on the comments icon.
+* Click ![Comments](images/add-comments-icon.png) to open the Comments dialog. Type in your comments here, and press Enter to add the comment. You can also delete any comments by clicking the corresponding **Delete** icon. Click the comments icon to close the dialog. You can provide comments for each paragraph in a notebook. Paragraphs with comments are indicated by a green dot on the comments icon.
 * Click ![Expand](images/expand-icon.png) to view the notebook paragraph in full screen mode. To view the paragraph in the normal mode, click the collapse icon.
 * Click ![Show Hide Line Numbers](images/showhide-line-nos.png) to show line numbers in the paragraph.
 * Click ![Visibility](images/visibility.png) to view the paragraph title, code, results, and the paragraph settings.
@@ -419,363 +410,61 @@ To edit an existing notebook:
 * Click Settings to adjust settings of the notebook paragraph output. This setting is specifically applicable to visualizations in graphs, charts, vertical height of paragraph output etc.
 * Click download-as to download the paragraph as a text file, or as ``.png`` or ``.svg`` files, as applicable, for paragraphs that contains graphs or charts as output.
 
-## Task 5: Create Paragraph Dependencies and Run Paragraphs as per Dependency Order
+This completes the task of working with various notebook features. To learn more about advanced notebook features, see _Lab 6: Advanced Notebooks Options_ in the workshop [Oracle Machine Learning Notebooks](https://apexapps.oracle.com/pls/apex/r/dbpm/livelabs/run-workshop?p210_wid=891&p210_wec=&session=17495085944752).
 
-Paragraph Dependencies allow you to add dependencies between paragraphs. The dependent paragraphs automatically run after the original paragraph is run, according to the order of dependency.
-To create paragraph dependencies:
-1. On the Notebooks page, click **Create**.
-2. In the Create Notebooks dialog, enter the name _Paragraph Dependencies Demo_ in the **Name** field and click **OK.** The notebook is created and it opens in the notebook editor.
-3. On the notebook, hover your cursor over the lower border of the paragraph and click the + icon to add a paragraph. Or, click on the **Add SQL Paragraph** icon to call the PL/SQL interpreter.
-	![Add PLSQL paragraph](images/add-sql-script-toolbar.png)
-4. In the first paragraph, copy and paste the following PL/SQL script. This script creates the view ESM_SH_DATA from the SALES table present in the SH schema.
-	```
-	<copy>
-	CREATE OR REPLACE VIEW ESM_SH_DATA AS
-	  SELECT TIME_ID, AMOUNT_SOLD FROM SH.SALES;
-	</copy>
-	```
+## Task 5: Visualize your Data in OML Notebooks
 
-5. In the second paragraph, copy and paste the following SQL script. This script gives a count of the record present in the view ESM_SH_DATA.
+OML Notebooks offer rich visualization capabilities of your data. The visualizations depend on the type of your dataset.
+The following visualization options are available.  
 
-	```
-	<copy>
-	SELECT COUNT(*) FROM ESM_SH_DATA;
+* Table - A table is an arrangement of information or data in rows and columns. Using OML Notebooks, you can create database tables, and also view the information in a tabular format. 
+* Area Chart - An area chart uses lines to connect the data points and fills the area below these lines to the x-axis. Each data series contributes to the formation of a distinct shaded region. This emphasizes its contribution to the overall trend. As the data points fluctuate, the shaded areas expand or contract.
+* Bar Graph - A bar graph is a graphical representation of data in rectangular bars. The length and height  of the bars, depending on the horizontal or vertical orientation, depict the dataset distribution. One axis represents a category, while the other represents values or counts.
+* Funnel Chart - A funnel chart is a graphical representation that resembles the shape of a funnel where each segment gets progressively narrower. The segments are arranged vertically and depict a hierarchy. Within the funnel chart, each segment corresponds to a step or stage in a sequential process.
+* Line Chart - A line chart is a graphical representation used to display data points connected by straight lines.
+* Pie Chart - A pie chart is a graphical representation of data in a circular form, with each slice of the circle representing a fraction that is a proportionate part of the whole.
+* Pyramid Chart - Pyramid charts present your data in a distinctive triangular configuration, horizontally segmented into partitions. Each segment in the pyramid charts represents points or steps in ascending or descending order. 
+* Box Plot - A box plot provides an overview of data distributions in numeric data. It provides general information about the symmetry, skewness, variance, and outliers in a dataset. The box plot uses boxes and lines to depict the data distribution. 
+* Scatter Plot - Scatter plots represent the relationship between two numeric variables in a data set. It represents data points on a two-dimensional plane and show how much one variable is affected by another. The independent variable is plotted on the X-axis, while the dependent variable is plotted on the Y-axis. You can display points by one or more grouping variables such that each group has a distinct color and shape. 
+* Tree Map - A treemap is a visualization composed of nested rectangles, that represent certain categories within a selected dimension and are ordered in a hierarchy, or “tree.” Quantities and patterns can be compared and displayed in a limited chart space. Treemaps also show the relationship of each part (or nested rectangles) to the whole (tree). 
+* Sun-burst - The sunburst chart is typically used to visualize hierarchical data structures - with part-to-whole relationships in data depicted additionally.
+* Tag Cloud - A tag cloud is a visual representation of the most popular words (or tags) found in free-form text.
+* Maps - Map plots display data points on a geographical map.
 
-	</copy>
-	```
+To visualize your data, let's consider the _Test Notebook_ that you created in **Task 3-Create a Notebook and Define Paragraphs using the md, SQL, PL/SQL, Python, and R Interpreters** in this lab. 
 
-6. In the third paragraph, copy and paste the following SQL script to review the data in a tabular format.
+1. Open the _Test Notebook_ and go to the paragraph where you created and viewed the Iris dataset in a table. The tabular format presents the data in rows and columns. The Iris data set contains:
+	* Three classes (three different species of the Iris flower) - Setosa, Versicolor, and Virginica. 
+	* Four numeric properties about those classes - Sepal Length, Sepal Width, Petal Length, and Petal Width. 
 
-	```
-	<copy>
-	SELECT * FROM ESM_SH_DATA
-	FETCH FIRST 10 ROWS ONLY;
+	![View IRIS table](images/iris-temp-table.png)
 
-	</copy>
-	```
+2. On the paragraph notebook toolbar, click on the pie chart icon. The tabular data is now rendered in a pie chart. The size of each slice of the pie chart represents a fraction that is proportionate to the whole. It also depicts the percentage of each class. Hover your cursor over each slice to view additional details about the respective class it represents. 	
 
-7. Go to the first paragraph and click on the **Enter Dependency Mode** icon.
-	![Enter Dependency Mode](images/enter-dep-mode-1.png)
+	![pie-chart](images/pie-chart.png)
 
-	The message appears: _You are selecting dependents for this paragraph._
+3. You may also visualize this dataset in a box plot by clicking on the box plot icon. The box plot shows the data distribution of the 3 classes - Setosa, Versicolor, and Virginica. Hover your cursor over each slice to view additional details such as the inter-quartile ranges and quartiles, outliers (additional customization required) and so on for each class. This box plot displays the data for one property (sepal length) for the three classes. You can customize the box plot view all the properties of the three classes. 
 
-8. Click on the second and third paragraph to add them as dependents of paragraph one.
+	Visualization of the data in a box plot.  
 
-	>**Note:** The order of paragraph dependency is based on the order of your click.
+	![boxplot](images/boxplot1.png)
+	 
+4. The output in any of the visualization option depends on the default visualization behavior. The tool automatically selects the columns to show. You can change these settings. 
 
-	![Add Dependents](images/add-dependents.png)
+	Click the Settings icon ![Settings icon](images/settings-icon.png) to open the Settings dialog. 
+	* In the **Setup** tab, you have the option to increase or decrease the height of the box plot, select or deselect columns (series) to display, and so on.
+	![Setup](images/setup-tab.png)
 
-9. Click **Save.**
-	![Save Dependents](images/save-dependents.png)
+	* In the **Customization** tab, you have the option to customize the layout, define values for the interquartile range (specific to boxplot), define the maximum number of elements, add labels to X axis and Y axis, change the display color, and even add description to the chart.
+	![Customization](images/customization-tab.png)
 
-	Once the dependent paragraphs are defined and saved, it is indicated by the numbers as shown in the screenshot here:
-	![Dependent Paragraphs](images/dep-para-created.png)
-10. Now, go to the first paragraph and click the run icon . After the first paragraph starts successfully, the subsequent dependent paragraphs start to run according to the order of dependency.
-	![Dependent Paragraphs](images/run-para-1.png)
-	This screenshot shows the successful run of paragraph 1 and 2 (dependent paragraph 1):
-	![Paragraphs 1 and 2 run success ](images/para-1-2-run.png)
+	For details about the Iris dataset visualization, and all the other visualization options, settings, and customizations, [Lab 3: Visualize Data in Oracle Machine Learning Notebooks](https://oracle-livelabs.github.io/oml/oml/workshops/freetier/index.html?lab=oml-nb-visualizations) in the workshop _Introduction to Oracle Machine Learning Notebooks_ in the workshop _Introduction to Oracle Machine Learning Notebooks._
 
-	This screenshot shows the successful run of paragraph 3 (dependent paragraph 2):
-	![Paragraph 3 run success](images/para-3-run.png)
+This completes the task of visualizing your data in a notebook. 
 
+To know more about the advanced options available in Oracle Machine Learning Notebook, see [Lab 6: Advanced Options in Oracle Machine Learning Notebooks](https://oracle-livelabs.github.io/oml/oml/workshops/freetier/index.html?lab=adv-notebooks-options) in the workshop _Introduction to Oracle Machine Learning Notebooks._ 
 
-## Task 6: Create Notebook Versions
-
-By creating versions of your notebook, you can archive your work in a notebook.
-You can create versions of notebooks on the notebooks page, as well as in the notebook editor. In this example, the _Paragraph Dependencies Demo_ notebook is used to create versions of it.
-
->**Note:** A versioned notebook is non-editable. If you want to make any changes to a particular version of a notebook, you must restore that version to edit it.
-
-**Prerequisites:** The _Paragraph Dependencies Demo_ notebook. This notebook is created as part of Task 5 of this lab.
-
-### Task 6.1: Create Versions on the Notebooks page
-In this task, you will create Version 1 of the _Paragraph Dependencies Demo_ notebook.
-1. On the Notebooks page, select the _Paragraph Dependencies Demo_ notebook to enable all the edit options.
-	![Notebooks page with options enabled](images/nbea-options-enabled.png)
-2. Click **Version** to go to the versions page for this notebook.
-	![Notebooks page with options enabled](images/nbea-versions-clicked.png)
-3. On the Versions page for this notebook, click **Versions** to open the Create Versions dialog.
-	![Notebooks versions page](images/nbea-versions-page.png)
-
-3. In the Create Versions dialog:
-	* **Name:** Enter _Version 1_ for the new version of this notebook
-	* **Descriptions:** Enter comments, if any.
-	* Click **OK.** Once the notebook version is created, it is listed on the Versions - Notebook Versioning Demo page.
-
-	![Notebooks versions page](images/create-version1-dialog.png)
-4. On the _Paragraph Dependencies Demo_ page, select **Version 1** of the notebook version that you just created to enable all the available options.
-	* Click **Delete** to delete the selected version of the notebook.
-	* Click **Restore Version** to restore the selected version of the notebook.
-5. Click **Back to Notebooks** to go back to the Notebooks page.
-	![Notebook versions page](images/view-ver1.png)
-
-### Task 6.2: Create Versions in the Notebooks Editor
-By creating versions of your notebook, you can archive your work in a notebook. You can create versions of an open notebook, as well as on the notebooks listing page. In this example:
-
-* The original notebook _Paragraph Dependencies Demo_, is edited to add a script to build a machine learning model.
-* The notebook _Paragraph Dependencies Demo_ is then versioned as **Version 2** to archive the code to build the machine learning model.
-* The **Version 2** and **Version 1** of the _Paragraph Dependencies Demo_ notebook are compared using the **Compare Versions** feature.
-
-
->**Note:** A versioned notebook is non-editable. If you want to make any changes to a particular version of a notebook, you must restore that version to edit it.
-
-To create a new notebook version and view version history:
-1. On the Notebooks page, click on the _Paragraph Dependencies Demo_ notebook to open it in the notebook editor.
-	> **Note:**  **Version 1** of this notebook is already created as part Task 6.1 in this lab. It contains the archived code to create the view `ESM_SH_DATA`, count the number of records, and view the data. Clicking on the notebook opens the original editable version.
-
-	![Notebooks versions page](images/click-para-dep-nb.png)
-
-2. Now, edit the notebook to add a script to build a machine learning model. On the notebook, hover your cursor over the lower border of the third paragraph, and click the **Add SQL Script Paragraph**  to call the PL/SQL Interpreter.
-
-	![Add PL/SQL Paragraph](images/add-sql-script-toolbar.png)
-
-3. Copy and paste the following script to the new paragraph. This script builds a machine learning model using the ESM algorithm.
-
-	```
-	<copy>
-		BEGIN DBMS_DATA_MINING.DROP_MODEL('ESM_SALES_FORECAST_1');
-	EXCEPTION WHEN OTHERS THEN NULL; END;
-	/
-	DECLARE
-	    v_setlst DBMS_DATA_MINING.SETTING_LIST;
-	BEGIN
-
-	    v_setlst('ALGO_NAME')            := 'ALGO_EXPONENTIAL_SMOOTHING';
-	    v_setlst('EXSM_INTERVAL')        := 'EXSM_INTERVAL_QTR'; -- accumulation int'l = quarter
-	    v_setlst('EXSM_PREDICTION_STEP') := '4';                 -- prediction step = 4 quarters
-	    v_setlst('EXSM_MODEL')           := 'EXSM_WINTERS';      -- ESM model = Holt-Winters
-	    v_setlst('EXSM_SEASONALITY')     := '4';                 -- seasonal cycle = 4 quarters    
-
-	    DBMS_DATA_MINING.CREATE_MODEL2(
-	        MODEL_NAME          => 'ESM_SALES_FORECAST_1',
-	        MINING_FUNCTION     => 'TIME_SERIES',
-	        DATA_QUERY          => 'select * from ESM_SH_DATA',
-	        SET_LIST            => v_setlst,
-	        CASE_ID_COLUMN_NAME => 'TIME_ID',
-	        TARGET_COLUMN_NAME  =>'AMOUNT_SOLD');
-	END;
-	</copy>
-	```
-4. Now, archive this notebook along with the code to build the machine learning model by versioning it. On the top left corner of the notebook editor, click the Versioning icon.
-
-	![Notebooks versions page](images/create-version2.png)
-
-5. The options to **Create Version** and **View Version History** opens. Click **Create Version**.
-
-	![Notebooks versions page](images/create-version-option.png)
-
-6. In the New Version dialog:
-
-	* **Name:** Here, the name Version 2 is taken by default. Let's retain this name.
-	* **Description:** Enter notes, if any.
-	* Click **Create.**
-	![Notebooks versions page](images/create-version2-dialog.png)
-	* A message is displayed confirming the creation of the new version.
-	![Notebook EA versions page](images/message-version2.png)
-
-### Task 6.3: View Version History and Compare Notebooks Versions
-To view the version that you created in Task 6.2:
-
-1. Click the versioning icon, and then click **View Version History**.
-	![Notebooks versions page](images/view-version-history.png)
-
-2. On the right pane of the notebook editor, the Version History panel opens.
-	![Notebooks versions page](images/version-history-pane.png)
-3. Hover your cursor over any notebook version and click on it to enable the available options. You can perform the following tasks in the Version History panel. On the Version History pane on the right:
-	![Notebooks versions page](images/version-history-options.png)
-	* Click the open version icon to open the selected version. Clicking on any versioned notebook opens the notebook in read-only mode, as versioned notebooks are non-editable.
-	![Open Notebooks version](images/open-version.png)
-	To view the current editable version, click View current version of the notebook.
-	![View Current Notebook version](images/view-current-version.png)
-	* Click **Delete** to delete the selected version.
-	* Click **Compare Versions** to compare the current version of the notebook with another version.
-	![Compare Notebook version](images/click-compare-version.png)
-	You can select other available versions from the drop-down list. In this example, **Version 2** of the notebook, which is under Current State is compared with **Version 1**. The new additions are highlighted in green, as shown in the screenshot here.
-	![Compare Notebook version](images/compare-version.png)
-	* Click **Cancel** to exit the dialog.
-	* Click **Restore** to restore the selected version.
-	>**Note:** Restoring a selected version of the notebook will discard all the unversioned changes, if any.
-
-## Task 7: Create a Notebook using a Template Example
-
-This task demonstrates how to create notebooks based on Example templates. You will learn how to:
-* Create the OML4Py Classification notebook based on the OML4Py Classification DT example template. The template builds and applies the classification Decision Tree algorithm to build a classification model based on the relationships between the predictor values and the target values. The template uses the Sales History (`SH`) schema.
-* Create the Time Series notebook based on the OML4SQL Time Series ESM example template. This template forecasts sales by using the Exponential Smoothing Algorithm for Time Series Data. It also used the `Sales` table in the SH schema.
-
-### Task 7.1: Create an OML4Py Notebook using the Classification DT Template Example
-
-This step demonstrates how to create the OML4Py Classification notebook based on the OML4Py Classification DT (Decision Tree) Example template:
-
-1. Go to the Examples page by clicking the Cloud menu icon ![Cloud menu icon](images/cloud-menu-icon.png)  on the top left corner of the page to open the left navigation menu. On the left navigation menu, click **Templates** and then click **Examples**.
-
-	![Left Navigation menu - Examples](images/left-nav-pane-examples.png)
-
-  Alternatively, on the Oracle Machine Learning home page, click **Examples** in the Quick Actions section to go Examples.
-
-	![Oracle Machine Learning home page](images/homepage-examples.png)
-
-
-2. Navigate to the **OML4Py Classification DT** example template notebook. You can search for the notebook by typing in keywords in the search box on the upper right corner of the page. Click on the grey box around the notebook. This highlights the notebook and enables the **Create Notebook** button. Click **Create Notebook**.
-
-	![Create Notebook](images/classification-dt-example.png)
-
-3. The Create Notebook dialog opens. The Name field displays the same name as the template with the suffix `(1)`. You can edit this name. In this example, we will retain the auto-generated name `OML4PY Classification DT (1)`. Click **OK**.
-
-	> **Note:** In the Project field, the current user, project and workspace is selected by default. You have the option to choose a different project or a workspace by clicking the edit icon here.  
-
-	![Create Classification DT notebook from example template](images/create-notebook-classification.png)
-
-4. Once the notebook is created, the message _Notebook "OML4PY Classification DT (1)" created in project "OMLUSER Project"_ is displayed, as shown in the screenshot. The notebook is now available on the Notebooks page. You may also click **Open Notebook** in the message dialog to open the notebook directly from here.
-
-	![Create notebook message](images/notebook-created-message.png)
-
-5. To view the notebook that you just created, click the Cloud menu icon ![Cloud menu icon](images/cloud-menu-icon.png) on the top left corner of the page to open the left navigation menu. Click **Notebooks** to go to the Notebooks page.
-
-	![Notebooks in left navigation menu](images/left-nav-pane-notebooks.png)
-
-6. The OML4PY Classification DT (1) notebook is now listed on the Notebooks page, as shown in the screenshot. Click it to open the notebook in the Notebooks editor. Note that you will run this notebook in the subsequent steps.
-
-	![Notebook listed](images/notebook-listed.png)
-	
-
-This completes the task of creating a notebook from an Example template.
-
-### Task 7.2: Create a Time Series Notebook using the OML4SQL Time Series Template Example
-
-These steps demonstrate how to create the Time Series notebook based on the Example template:
-
-7. Click the Cloud menu icon ![Cloud menu icon](images/cloud-menu-icon.png) on the top left corner of the page to open the left navigation menu. Click **Examples** under Templates to open the Examples page. 
-
-	![Examples in Left Navigation menu](images/left-nav-pane-examples.png)
-
-If you choose to go to the home page, then click **Home** on the left navigation pane, and then click **Examples**.	
-
-8. Navigate to the **OML4SQL Time Series ESM** example template notebook. You may type ESM in the search box on the upper right corner of the page to get a list of the ESM-related notebooks. Click the grey box around the notebook. This highlights the notebook and enables the **Create Notebook** button. Click **Create Notebook**.
-
-	![Create Notebook](images/oml4sql-time-series.png)
-
-9. The Create Notebook dialog opens. By default, the **Name** field displays the same name as the template with the suffix `(1)`. You can edit this field. In this example, we will retain the auto-generated name **OML4SQL Time Series ESM (1)** and click **OK**.
-
-	> **Note:** In the Project field, the current user, project and workspace is selected by default. You have the option to choose a different project or a workspace by clicking the edit icon here.  
-
-	![Create Time Series notebook from example template](images/create-notebook-time-series.png)
-
-10. Once the notebook is created, the message _Notebook "OML4SQL Time Series ESM (1)" created in project "OMLUSER Project"_ is displayed. The notebook is now available on the Notebooks page. You may also click **Open Notebook** in the message dialog to open the notebook directly from here.
-
-	![Time Series notebook message](images/esm-notebook-message.png)
-
-11. To view the notebook, click the Cloud menu icon ![Cloud menu icon icon](images/cloud-menu-icon.png) on the top left corner of the page to open the left navigation menu. Click **Notebooks** to go to the Notebooks page.
-
-	![Notebooks in left navigation menu](images/notebooks-left-nav-pane-esm.png)
-
-
-12. The notebook **Notebook "OML4SQL Time Series ESM (1)** is now listed on the Notebooks page, as shown in the screenshot. Click on the notebook to open it in the Notebooks editor and work on it.
-
-	![Notebook listed](images/notebook-list-1.png)
-
-
-This completes the task of creating the Time Series notebook from the OML4SQL Time Series ESM Example template.
-
-## Task 8: Change Notebook Service Level
-
-Notebook type corresponds to the ADB service levels — low, medium, high and gpu. These service levels affect parallelism in the database. The notebook type that is set for a notebook applies to all the paragraphs in that notebook. For the notebooks in Oracle Machine Learning UI, you use the following interpreters:
-
-* SQL interpreter for SQL statements
-* PL/SQL  interpreter for PL/SQL scripts/statements
-* Python interpreter to process Python scripts
-* R interpreter to run R commands and scripts
-* md (MarkDown) interpreter for plain text formatting syntax so that it can be converted to HTML.
-
-
-	> **Note:** The service level that is set for a notebook applies to all the paragraphs in that notebook. 
-
-In this step, you learn how to change the notebook service levels:
-1. Go to the Notebooks page by clicking the Cloud menu icon on ![Cloud menu icon](images/cloud-menu-icon.png) the top left corner of the page. On the left navigation menu, click **Notebooks**.
-	
-
-	![Notebooks in left navigation menu](images/left-nav-pane-notebooks.png)
-
-2. On the Notebooks page, click on the **OML4PY Classification_DT (1)** notebook to open it in the Notebook editor.
-
-	![Open Classification notebook](images/open-classification-dt.png)
-	
-
-3. Click on the **Update Notebook Type** icon ![Update Notebook type icon](images/update-notebook-type-icon.png)on the top right corner. The available notebook types are displayed. The current notebook type is indicated by a tick mark, and is also displayed next to the **Update Notebook Type** icon. 
-
-	![Update Notebook Type icon](images/classification-dt-nbtype-icon.png)
-
-	The Notebook Types (ADB service levels) are: 
-
-	* **low** — Provides the least level of resources for in-database operations, typically serial (non-parallel) execution. It supports the maximum number of concurrent in-database operations by multiple users. The interpreter with low priority is listed at the top of the interpreter list, and hence, is the default.
-	* **medium** — Provides a fixed number of CPUs to run in-database operations in parallel, where possible. It supports a limited number of concurrent users, typically 1.25 times the number of CPUs allocated to the pluggable database.
-	* **high** — Provides the highest level of CPUs to run in-database operations in parallel, up to the number of CPUs allocated to the pluggable database. It offers the highest performance, but supports the minimum number of concurrent in-database operations, typically 3.
-	* **gpu** — Provides GPU compute capabilities in a notebook through the Python interpreter with the database service level set to high. The notebook memory setting is 32 GB (DDR4), by default. It is extensible up to 200 GB.
-
-	![Notebook Type low](images/notebook-type-low.png)
-
-4. To change the notebook type, click on the type that you want to select. In this example, let's click high. A confirmation message is displayed stating: `Notebook Type is updated to "high".`
-
-	![Notebook Type high](images/notebook-type-high.png)
-
-	> **Note:** The updated notebook type is applicable to all the paragraphs in the notebook. You cannot change the notebook type at the paragraph level.
-
-	This completes the task of changing notebook service level.
-
-
-## Task 9: Create Jobs to Schedule Notebook Run
-
-Jobs allow you to schedule the running of notebooks. On the Jobs page, you can create jobs, duplicate jobs, start and stop jobs, delete jobs, and monitor job status by viewing job logs, which are read-only notebooks. In this lab, you will learn how to create a job to schedule the running of the notebook Classification_DT.
-
-To create a job:
-
-1. Click the Cloud menu icon ![Cloud menu icon](images/cloud-menu-icon.png) on the top left corner of the page to open the left navigation menu, and click **Jobs** to go to the Jobs page. 
-
-	![Job](images/left-nav-pane-jobs.png)
-
-You can also go to Jobs from the Oracle Machine Learning home page by clicking **Jobs**.
-
-![Homepage Jobs](images/homepage-jobs.png)
-
-2. On the Jobs page, click **Create**. The Create Job dialog opens.
-
-	![Create Job](images/create-job.png)
-
-3. In the **Name** field, enter `Job1`. The number of characters in the job name must not exceed 128 bytes.
-
-	![Create Job](images/create-jobs1.png)
-
-4. In the **Notebook** field, click the search icon. This opens the Search Notebook dialog. In the Search Notebook dialog, navigate through the OMLUSER workspace and OMLUSER project, select `OML4PY Classification_DT (1)`, and click **OK**.
-
-	> **Note:** Only notebooks that are owned by the user or shared are available for selection.
-
-	![Select notebook to schedule job](images/select-notebook-for-job-livelabs.png)
-	
-
-5. In the **Start Date** field, click the date-time editor to set the date and time for your job to commence. You can select the current date or any future date and time. Based on the selected date and time, the next run date is computed.
-
-6. Select **Repeat Frequency** and enter **3**, and select **Days** to set the repeat frequency and settings. You can set the frequency in minutes, hours, days, weeks, and months.
-
-7. Expand **Advanced Settings**, and specify the following settings:
-
-	![Create Job](images/create-jobs2.png)
-
-	* **Maximum Number of Runs:** Select **3**. This specifies the maximum number of times the job must run before it is stopped. When the job reaches the maximum run limit, it will stop.  
-
-	* **Timeout in Minutes:** Select **60**. This specifies the maximum amount of time a job should be allowed to run.
-
-	* **Maximum Failures Allowed:** Select **3**. This specifies the maximum number of times a job can fail on consecutive scheduled runs. When the maximum number of failures is reached, the next run date column in the Jobs UI will show an empty value to indicate the job is no longer scheduled to run. The Status column may show the status as `Failed`.
-
-		> **Note:** Select **Automatic Retry** if you do not wish to specify the maximum failures allowed manually.  
-
-8. Click **OK**. The job is now listed on the Jobs page with the status SCHEDULED.
-
-	![Job created](images/job-created1.png)
-
-9. Click on the job row to enable the options to either **Edit**, **Duplicate**, **Start**, or **Delete** the selected job.
-
-	![Job created](images/job-created.png)
-
-This completes the task of creating a job. You may now **proceed to the next lab**.
+You may now **proceed to the next lab**.
 
 ## Learn More
 
@@ -786,4 +475,4 @@ This completes the task of creating a job. You may now **proceed to the next lab
 
 * **Author** -  Moitreyee Hazarika, Principal User Assistance Developer, Database User Assistance Development
 * **Contributors** -   Mark Hornick, Senior Director, Data Science and Machine Learning; Marcos Arancibia Coddou, Product Manager, Oracle Data Science; Sherry LaMonica, Consulting Member of Tech Staff, Machine Learning
-* **Last Updated By/Date** - Moitreyee Hazarika, October 2024
+* **Last Updated By/Date** - Moitreyee Hazarika, February 2025
